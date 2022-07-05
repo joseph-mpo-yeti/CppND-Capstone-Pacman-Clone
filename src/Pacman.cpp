@@ -1,10 +1,14 @@
 #include <iostream>
+#include <thread>
+#include <future>
 
-#include "Game.h"
+#include "GameManager.h"
 
 
-int main(int argc, char** argv){
-    Game game;
-    std::cout << "Hello World" << std::endl;
+int main()
+{
+    GameManager gameManager;
+    gameManager.run();
+    
     return 0;
 }

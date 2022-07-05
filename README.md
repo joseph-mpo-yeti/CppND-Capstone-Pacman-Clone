@@ -1,4 +1,4 @@
-# Cpp-ND-Capstone-Project
+# CppND-Capstone-Pacman-Clone
 Pacman clone for Udacity's C++ Nanodegree Capstone Project
 
 ## Dependencies for Running Locally
