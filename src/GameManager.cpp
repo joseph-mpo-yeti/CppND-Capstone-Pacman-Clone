@@ -15,4 +15,5 @@ GameManager::~GameManager()
 void GameManager::run()
 {
     _graphics->Init();
+    _graphics->Update();
 }

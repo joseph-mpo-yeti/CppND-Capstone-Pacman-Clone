@@ -1,13 +1,8 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-class Physics
-{
-    public:
-
-    private:
-
-    private:
-};
+#include "physics/tranform.h"
+#include "physics/collider.h"
+#include "physics/rigidbody.h"
 
 #endif // PHYSICS_H
