@@ -128,6 +128,11 @@ std::unique_ptr<sf::Texture> Graphics::LoadTexture(std::string filename)
     return nullptr;
 }
 
+void Graphics::CloseWindow()
+{
+    _window->close();
+}
+
 bool Graphics::WindowIsOpen()
 {
     return _window->isOpen();

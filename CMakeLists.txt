@@ -19,4 +19,4 @@ include_directories(include)
 
 add_executable(pacman ${project_SRCS})
 
-target_link_libraries(pacman sfml-graphics sfml-audio)
+target_link_libraries(pacman pthread sfml-graphics sfml-audio)

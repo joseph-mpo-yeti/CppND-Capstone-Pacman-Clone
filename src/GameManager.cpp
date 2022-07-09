@@ -195,4 +195,5 @@ bool GameManager::InitMaze()
 void GameManager::EndGame()
 {
     _isRunning = false;
+    _graphics->CloseWindow();
 }

@@ -25,10 +25,11 @@ class Graphics
         // behavior
         bool Init();
         void Clear();
-        void Render(const Entity& entity);
-        std::unique_ptr<sf::Texture> LoadTexture(std::string filename);
         void Present();
+        void CloseWindow();
+        void Render(const Entity& entity);
         bool PollEvent(sf::Event& event);
+        std::unique_ptr<sf::Texture> LoadTexture(std::string filename);
 
         // setters / getters
         int GetFrameRate();
