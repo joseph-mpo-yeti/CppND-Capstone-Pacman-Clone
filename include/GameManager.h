@@ -32,7 +32,7 @@ class GameManager
         void ShowGame();
         void HideGame();
         void EndGame();
-        void ProcessInput(SDL_Event& event);
+        void ProcessInput(sf::Event& event);
         
         bool InitPlayer();
         bool InitEnemies();

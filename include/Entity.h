@@ -1,7 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include <SDL2/SDL.h>
+#include <SFML/Graphics.hpp>
 #include <memory>
 
 #include "Tag.h"
@@ -17,9 +17,9 @@ class Entity
         Tag GetTag() const;
         Transform& GetTransform();
         Collider& GetCollider();
-        SDL_Texture* GetTexture();
+        sf::Texture* GetTexture();
 
-        void LoadTexture(std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> texture);
+        void LoadTexture(std::unique_ptr<sf::Texture> texture);
         void SetTag(Tag tag);
         bool IsAlive();
     
@@ -29,7 +29,7 @@ class Entity
         bool _isAlive;
         Transform _transform;
         Collider _collider;
-        std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> _texture { NULL, SDL_DestroyTexture };
+        std::unique_ptr<sf::Texture> _texture { nullptr };
 
 };
 

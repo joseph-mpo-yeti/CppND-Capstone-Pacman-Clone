@@ -23,12 +23,12 @@ Collider& Entity::GetCollider()
     return _collider;
 }
 
-SDL_Texture* Entity::GetTexture()
+sf::Texture* Entity::GetTexture()
 {
     return _texture.get();
 }
 
-void Entity::LoadTexture(std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> texture)
+void Entity::LoadTexture(std::unique_ptr<sf::Texture> texture)
 {
     _texture = std::move(texture);
 }

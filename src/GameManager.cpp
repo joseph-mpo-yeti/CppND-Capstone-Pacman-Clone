@@ -5,7 +5,7 @@
 #include <condition_variable>
 #include <algorithm>
 #include <chrono>
-#include <SDL2/SDL.h>
+#include <SFML/Graphics.hpp>
 
 #include "GameManager.h"
 
@@ -44,14 +44,14 @@ void GameManager::Run()
     
     ShowGame();
 
-    SDL_Event event;
+    sf::Event event;
 
     auto lastUpdate = std::chrono::system_clock::now();
     int timeSinceLastUpdate = 0;
 
     _isRunning = true;
 
-    while(_isRunning){
+    while(_graphics->WindowIsOpen()){
 
         
         timeSinceLastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastUpdate).count();
@@ -72,42 +72,42 @@ void GameManager::Run()
     }
 }
 
-void GameManager::ProcessInput(SDL_Event& event)
+void GameManager::ProcessInput(sf::Event& event)
 {
     std::cout << "Polling events..." << std::endl;
     // polling events
-    SDL_PollEvent(&event);
+    _graphics->PollEvent(event);
 
     // handling input
     switch (event.type) {
-        case SDL_QUIT:
+        case sf::Event::Closed:
             EndGame();
             return;
 
-        case SDL_KEYDOWN:
-            switch (event.key.keysym.sym){
-                case SDLK_SPACE:
-                    if(_isPaused) 
-                        Resume();
-                    else 
-                        Pause();
-                    break;
-                case SDLK_UP:
-                    if(!_isPaused) _player->GetTransform().position.Update(0, -1, 0 );
-                    break;
-                case SDLK_DOWN:
-                    if(!_isPaused) _player->GetTransform().position.Update(0, 1, 0);
-                    break;
-                case SDLK_LEFT:
-                    if(!_isPaused) _player->GetTransform().position.Update(-1, 0, 0);
-                    break;
-                case SDLK_RIGHT:
-                    if(!_isPaused) _player->GetTransform().position.Update(1, 0, 0);
-                    break;
-                default:
-                    break;
-            }
-            break;
+        // case SDL_KEYDOWN:
+        //     switch (event.key.keysym.sym){
+        //         case SDLK_SPACE:
+        //             if(_isPaused) 
+        //                 Resume();
+        //             else 
+        //                 Pause();
+        //             break;
+        //         case SDLK_UP:
+        //             if(!_isPaused) _player->GetTransform().position.Update(0, -1, 0 );
+        //             break;
+        //         case SDLK_DOWN:
+        //             if(!_isPaused) _player->GetTransform().position.Update(0, 1, 0);
+        //             break;
+        //         case SDLK_LEFT:
+        //             if(!_isPaused) _player->GetTransform().position.Update(-1, 0, 0);
+        //             break;
+        //         case SDLK_RIGHT:
+        //             if(!_isPaused) _player->GetTransform().position.Update(1, 0, 0);
+        //             break;
+        //         default:
+        //             break;
+        //     }
+        //     break;
         default:
             break;
     }

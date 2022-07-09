@@ -1,8 +1,9 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include <SDL2/SDL.h>
 #include <string>
+#include <memory>
+#include <SFML/Graphics.hpp>
 
 #include "Entity.h"
 
@@ -25,24 +26,21 @@ class Graphics
         bool Init();
         void Clear();
         void Render(const Entity& entity);
-        std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> LoadTexture(std::string filename);
+        std::unique_ptr<sf::Texture> LoadTexture(std::string filename);
         void Present();
+        bool PollEvent(sf::Event& event);
 
         // setters / getters
         int GetFrameRate();
         int GetFrameDuration();
+        bool WindowIsOpen();
 
     private:
-        // window size
         float _aspectRatio, _width, _height;
-        // frame rate
         int _frameRate, _frameDuration;
-        // pause flag
         bool _isPaused = false;
-        // SDL window and renderer
         std::string _title;
-        std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)> _window { NULL,  SDL_DestroyWindow };
-        std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)> _renderer { NULL, SDL_DestroyRenderer };
+        std::unique_ptr<sf::RenderWindow> _window { nullptr };
 
 };
 

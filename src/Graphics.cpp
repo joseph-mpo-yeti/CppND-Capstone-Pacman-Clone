@@ -2,8 +2,6 @@
 #include <chrono>
 #include <thread>
 
-#include <SDL2/SDL_image.h>
-
 #include "Graphics.h"
 
 /* Graphics class implementation */
@@ -21,33 +19,33 @@ Graphics::Graphics(std::string title, float width, float height, float aspectRat
 
 Graphics::~Graphics()
 {
-    IMG_Quit();
-    SDL_Quit();
+    
 }
 
 bool Graphics::Init()
 {
-    if(SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        std::cout << "There was an error initializing SDL: " << SDL_GetError() << std::endl;
-        return false;
-    };
+    // if(SDL_Init(SDL_INIT_VIDEO) < 0)
+    // {
+    //     std::cout << "There was an error initializing SDL: " << SDL_GetError() << std::endl;
+    //     return false;
+    // };
     
-    if(SDL_Init(IMG_INIT_PNG) < 0)
-    {
-        std::cout << "There was an error initializing SDL_Image: " << IMG_GetError() << std::endl;
-        return false;
-    };
+    // if(SDL_Init(IMG_INIT_PNG) < 0)
+    // {
+    //     std::cout << "There was an error initializing SDL_Image: " << IMG_GetError() << std::endl;
+    //     return false;
+    // };
 
-    // creating window and renderer
-    _window.reset(SDL_CreateWindow(_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _width, _height, SDL_WINDOW_SHOWN));
-    _renderer.reset(SDL_CreateRenderer(_window.get(), -1, 0));
+    _window = std::make_unique<sf::RenderWindow>(sf::VideoMode(_width, _height), _title, sf::Style::Close);
+    // // creating window and renderer
+    // _window.reset(SDL_CreateWindow(_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _width, _height, SDL_WINDOW_SHOWN));
+    // _renderer.reset(SDL_CreateRenderer(_window.get(), -1, 0));
 
-    if(_window.get() == NULL || _renderer.get() == NULL)
-    {
-        std::cout << "There was an error creating a window and renderer: " << SDL_GetError() << std::endl;
-        return false;
-    }
+    // if(_window.get() == NULL || _renderer.get() == NULL)
+    // {
+    //     std::cout << "There was an error creating a window and renderer: " << SDL_GetError() << std::endl;
+    //     return false;
+    // }
 
     return true;
 }
@@ -64,7 +62,7 @@ int Graphics::GetFrameRate()
 
 void Graphics::Clear()
 {
-    SDL_RenderClear(_renderer.get());
+    _window->clear(sf::Color::Black);
 }
 
 // helper for printing tag
@@ -100,32 +98,42 @@ void Graphics::Render(const Entity& entity){
 
 void Graphics::Present()
 {
-    SDL_RenderPresent(_renderer.get());
+    _window->display();
 }
 
 
-std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> Graphics::LoadTexture(std::string filename)
+std::unique_ptr<sf::Texture> Graphics::LoadTexture(std::string filename)
 {
-    std::string path = SDL_GetBasePath();
-    path.append("data/").append(filename);
-    std::cout << "Basepath is "<< path << std::endl;
+    // std::string path = SDL_GetBasePath();
+    // path.append("data/").append(filename);
+    // std::cout << "Basepath is "<< path << std::endl;
 
-    std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> surface = { 
-        IMG_Load(path.c_str()), 
-        [](SDL_Surface* sf){ 
-            std::cout << "Surface freed" << std::endl; 
-            SDL_FreeSurface(sf); 
-        }
-    };
+    // std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> surface = { 
+    //     IMG_Load(path.c_str()), 
+    //     [](SDL_Surface* sf){ 
+    //         std::cout << "Surface freed" << std::endl; 
+    //         SDL_FreeSurface(sf); 
+    //     }
+    // };
 
-    std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> texture = { 
-        SDL_CreateTextureFromSurface(_renderer.get(), surface.get()), 
-        [](SDL_Texture* tx){ 
-            std::cout << "Texture destroyed" << std::endl; 
-            SDL_DestroyTexture(tx); 
-        }
-    } ;
+    // std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> texture = { 
+    //     SDL_CreateTextureFromSurface(_renderer.get(), surface.get()), 
+    //     [](SDL_Texture* tx){ 
+    //         std::cout << "Texture destroyed" << std::endl; 
+    //         SDL_DestroyTexture(tx); 
+    //     }
+    // } ;
 
-    return std::move(texture);
-    
+    // return std::move(texture);
+    return nullptr;
+}
+
+bool Graphics::WindowIsOpen()
+{
+    return _window->isOpen();
+}
+
+bool Graphics::PollEvent(sf::Event& event)
+{
+    return _window->pollEvent(event);
 }
