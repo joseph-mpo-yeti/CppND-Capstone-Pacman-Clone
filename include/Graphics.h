@@ -24,17 +24,15 @@ class Graphics
 
         // behavior
         bool Init();
-        void Clear();
-        void Present();
-        void CloseWindow();
-        void Render(const Entity& entity);
-        bool PollEvent(sf::Event& event);
+        void Render(std::unique_ptr<Entity>& entity);
         std::unique_ptr<sf::Texture> LoadTexture(std::string filename);
 
         // setters / getters
-        int GetFrameRate();
-        int GetFrameDuration();
-        bool WindowIsOpen();
+        int GetHeight() { return _height; };
+        int GetWidth() { return _width; };
+        int GetFrameRate() { return _frameRate; };
+        int GetFrameDuration() { return _frameDuration; };
+        sf::RenderWindow& GetWindow() { return *_window.get(); };
 
     private:
         float _aspectRatio, _width, _height;

@@ -2,30 +2,10 @@
 
 #include "Entity.h"
 
-Entity::Entity(Tag&& tag, const std::string& filename) : _tag(tag), _isAlive(true)
+Entity::Entity(EntityType entityType, EnemyTag tag) : _entityType(entityType), _tag(tag), _isAlive(true)
 {
-    
-}
-
-
-Tag Entity::GetTag() const
-{
-    return _tag;
-}
-
-Transform& Entity::GetTransform()
-{
-    return _transform;
-}
-
-Collider& Entity::GetCollider()
-{
-    return _collider;
-}
-
-sf::Texture* Entity::GetTexture()
-{
-    return _texture.get();
+    _shape = sf::CircleShape(15.0f, 60UL);
+    _shape.setOrigin(_shape.getRadius() / 2.0f, _shape.getRadius() / 2.0f);
 }
 
 void Entity::LoadTexture(std::unique_ptr<sf::Texture> texture)
@@ -33,12 +13,26 @@ void Entity::LoadTexture(std::unique_ptr<sf::Texture> texture)
     _texture = std::move(texture);
 }
 
-void Entity::SetTag(Tag tag)
+void Entity::Init()
 {
-    _tag = tag;
-}
-
-bool Entity::IsAlive()
-{
-    return _isAlive;
+    switch (_tag)
+    {
+    case EnemyTag::PLAYER:
+        _shape.setFillColor(sf::Color::Yellow);
+        break;
+    case EnemyTag::RED:
+        _shape.setFillColor(sf::Color::Red);
+        break;
+    case EnemyTag::MAGENTA:
+        _shape.setFillColor(sf::Color::Magenta);
+        break;
+    case EnemyTag::BLUE:
+        _shape.setFillColor(sf::Color::Blue);
+        break;
+    case EnemyTag::GREEN:
+        _shape.setFillColor(sf::Color::Green);
+        break;
+    default:
+        break;
+    }
 }

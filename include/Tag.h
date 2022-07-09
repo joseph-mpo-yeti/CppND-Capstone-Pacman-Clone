@@ -3,7 +3,7 @@
 
 #include <ostream>
 
-enum class Tag
+enum class EntityType
 {
     FOOD,
     POWER_UP,
@@ -12,5 +12,14 @@ enum class Tag
     WALL
 };
 
+
+enum class EnemyTag
+{
+    PLAYER, 
+    RED, 
+    GREEN, 
+    BLUE, 
+    MAGENTA
+};
 
 #endif // TAG_H

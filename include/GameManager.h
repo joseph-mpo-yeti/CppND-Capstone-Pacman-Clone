@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <thread>
 
 #include "Graphics.h"
 #include "Entity.h"
@@ -14,8 +15,17 @@ class GameManager;
 class GameManager 
 {
     public:
-        // constructor
+        // constructor / destructor
         GameManager();
+        ~GameManager();
+
+        // no copy policy
+        GameManager(const GameManager& other)=delete;
+        GameManager& operator=(const GameManager& other)=delete;
+
+        // move constructor / assignment operator
+        GameManager(GameManager&& other);
+        GameManager& operator=(GameManager&& other);
 
         // bahavior
         bool Init();
@@ -33,6 +43,10 @@ class GameManager
         void HideGame();
         void EndGame();
         void ProcessInput(sf::Event& event);
+        void OnKeyPressed(sf::Event& event);
+        
+        // helpers
+        void MoveHere(GameManager&& other);
         
         bool InitPlayer();
         bool InitEnemies();
@@ -46,6 +60,7 @@ class GameManager
         std::unique_ptr<Graphics> _graphics;
         std::unique_ptr<Entity> _player;
         std::vector<std::unique_ptr<Entity>> _enemies; 
+        std::vector<std::thread> _threads;
 };
 
 #endif // GAME_MANAGER_H

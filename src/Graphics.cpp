@@ -24,66 +24,31 @@ Graphics::~Graphics()
 
 bool Graphics::Init()
 {
-    // if(SDL_Init(SDL_INIT_VIDEO) < 0)
-    // {
-    //     std::cout << "There was an error initializing SDL: " << SDL_GetError() << std::endl;
-    //     return false;
-    // };
-    
-    // if(SDL_Init(IMG_INIT_PNG) < 0)
-    // {
-    //     std::cout << "There was an error initializing SDL_Image: " << IMG_GetError() << std::endl;
-    //     return false;
-    // };
-
     _window = std::make_unique<sf::RenderWindow>(sf::VideoMode(_width, _height), _title, sf::Style::Close);
-    // // creating window and renderer
-    // _window.reset(SDL_CreateWindow(_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _width, _height, SDL_WINDOW_SHOWN));
-    // _renderer.reset(SDL_CreateRenderer(_window.get(), -1, 0));
-
-    // if(_window.get() == NULL || _renderer.get() == NULL)
-    // {
-    //     std::cout << "There was an error creating a window and renderer: " << SDL_GetError() << std::endl;
-    //     return false;
-    // }
+    _window->setFramerateLimit(60);
 
     return true;
 }
 
-int Graphics::GetFrameDuration()
-{
-    return _frameDuration;
-}
-
-int Graphics::GetFrameRate()
-{
-    return _frameRate;
-}
-
-void Graphics::Clear()
-{
-    _window->clear(sf::Color::Black);
-}
-
 // helper for printing tag
-std::ostream& operator<<(std::ostream& out, const Tag& tag)
+std::ostream& operator<<(std::ostream& out, const EnemyTag& tag)
 {
     switch (tag)
     {
-    case Tag::FOOD:
-        out << "FOOD";
-        break;
-    case Tag::POWER_UP:
-        out << "POWER_UP";
-        break;
-    case Tag::PLAYER:
+    case EnemyTag::PLAYER:
         out << "PLAYER";
         break;
-    case Tag::ENEMY:
-        out << "ENEMY";
+    case EnemyTag::RED:
+        out << "ENEMY_RED";
         break;
-    case Tag::WALL:
-        out << "WALL";
+    case EnemyTag::GREEN:
+        out << "ENEMY_GREEN";
+        break;
+    case EnemyTag::MAGENTA:
+        out << "ENEMY_MAGENTA";
+        break;
+    case EnemyTag::BLUE:
+        out << "ENEMY_BLUE";
         break;
     default:
         break;
@@ -92,53 +57,17 @@ std::ostream& operator<<(std::ostream& out, const Tag& tag)
     return out;
 }
 
-void Graphics::Render(const Entity& entity){
-    std::cout << "Rendering entity with tag: " << entity.GetTag() << std::endl; 
+void Graphics::Render(std::unique_ptr<Entity>& entity){
+    std::cout << "Rendering entity with tag: " << entity->GetTag() << std::endl; 
+    
+    if(entity->GetTag() == EnemyTag::PLAYER)
+        _window->draw(entity->GetShape());
+    
 }
-
-void Graphics::Present()
-{
-    _window->display();
-}
-
 
 std::unique_ptr<sf::Texture> Graphics::LoadTexture(std::string filename)
 {
-    // std::string path = SDL_GetBasePath();
-    // path.append("data/").append(filename);
-    // std::cout << "Basepath is "<< path << std::endl;
+    std::unique_ptr<sf::Texture> tex = std::make_unique<sf::Texture>();
 
-    // std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> surface = { 
-    //     IMG_Load(path.c_str()), 
-    //     [](SDL_Surface* sf){ 
-    //         std::cout << "Surface freed" << std::endl; 
-    //         SDL_FreeSurface(sf); 
-    //     }
-    // };
-
-    // std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> texture = { 
-    //     SDL_CreateTextureFromSurface(_renderer.get(), surface.get()), 
-    //     [](SDL_Texture* tx){ 
-    //         std::cout << "Texture destroyed" << std::endl; 
-    //         SDL_DestroyTexture(tx); 
-    //     }
-    // } ;
-
-    // return std::move(texture);
-    return nullptr;
-}
-
-void Graphics::CloseWindow()
-{
-    _window->close();
-}
-
-bool Graphics::WindowIsOpen()
-{
-    return _window->isOpen();
-}
-
-bool Graphics::PollEvent(sf::Event& event)
-{
-    return _window->pollEvent(event);
+    return std::move(tex);
 }
