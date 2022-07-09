@@ -1,7 +1,7 @@
 #ifndef COLLIDER_H
 #define COLLIDER_H
 
-#include "physics/data.h"
+#include "data.h"
 
 class Collider
 {

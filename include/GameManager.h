@@ -1,29 +1,51 @@
 #ifndef GAME_MANAGER_H
 #define GAME_MANAGER_H
 
-#include <thread>
+#include <memory>
 #include <vector>
 
 #include "Graphics.h"
+#include "Entity.h"
+#include "Assets.h"
+
+// forward declaration
+class GameManager;
 
 class GameManager 
 {
     public:
-        // constructor / destructor
+        // constructor
         GameManager();
-        ~GameManager();
-
-        // getters / setters
 
         // bahavior
-        void run();
+        bool Init();
+        void Run();
 
     private:
-        // behavior
+        // bahavior
+        void Update();
+        void Render();
+        void Pause();
+        void Resume();
+        void HideLoading();
+        void ShowLoading();
+        void ShowGame();
+        void HideGame();
+        void EndGame();
+        void ProcessInput(SDL_Event& event);
+        
+        bool InitPlayer();
+        bool InitEnemies();
+        bool InitMaze();
 
     private:
         // private members
-        std::unique_ptr<Graphics> _graphics = nullptr;
+        int _score { 0 };
+        bool _isPaused = false;
+        bool _isRunning = false;
+        std::unique_ptr<Graphics> _graphics;
+        std::unique_ptr<Entity> _player;
+        std::vector<std::unique_ptr<Entity>> _enemies; 
 };
 
 #endif // GAME_MANAGER_H

@@ -2,8 +2,9 @@
 #define GRAPHICS_H
 
 #include <SDL2/SDL.h>
+#include <string>
 
-#include "Physics.h"
+#include "Entity.h"
 
 class Graphics
 {
@@ -14,44 +15,30 @@ class Graphics
         Graphics(std::string title, float width, float height, float aspectRatio, int frameRate);
         ~Graphics();
 
-        // no copy policy
+        // no copy/move policy
+        Graphics(Graphics&& other)=delete;
         Graphics(const Graphics& other)=delete;
+        Graphics& operator=(Graphics&& other)=delete;
         Graphics& operator=(const Graphics& other)=delete;
-        
-        // move constructor / move assignment operator
-        Graphics(Graphics&& other);
-        Graphics& operator=(Graphics&& other);
 
         // behavior
         bool Init();
-        void Update();
-        void Pause();
-        void Resume();
-    
-    private:
-        // getters / setters
-        SDL_Window* getWindow();
-        SDL_Renderer* getRenderer();
+        void Clear();
+        void Render(const Entity& entity);
+        std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> LoadTexture(std::string filename);
+        void Present();
 
-        // TODO: move into controller/player/entity
-        void InitPlayer();
+        // setters / getters
+        int GetFrameRate();
+        int GetFrameDuration();
 
     private:
         // window size
         float _aspectRatio, _width, _height;
-
         // frame rate
         int _frameRate, _frameDuration;
-
         // pause flag
         bool _isPaused = false;
-
-        // Player
-        // TODO: Move into player (to be updated later)
-        SDL_Rect _rect;
-        Velocity _velocity;
-        int _speed;
-
         // SDL window and renderer
         std::string _title;
         std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)> _window { NULL,  SDL_DestroyWindow };

@@ -1,16 +1,13 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-#include "physics/data.h"
+#include "data.h"
 
-class Transform
-{
-    public:
-    
-    public:
-    
-    private:
-    
+struct Transform
+{   
+    Vector3 position;
+    Vector3 rotation;
+    Vector3 velocity;
 };
 
 
