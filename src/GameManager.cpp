@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <algorithm>
 #include <chrono>
+
 #include <SFML/Graphics.hpp>
 
 #include "GameManager.h"
@@ -125,23 +126,27 @@ void GameManager::OnKeyPressed(sf::Event& event)
         return;
     }
 
-    switch (event.key.code)
+
+    if(_state == GameState::RUNNING)
     {
-        case sf::Keyboard::Key::Up:
-            _player->SetVelocity(0, -1.5f);
-            break;
-        case sf::Keyboard::Key::Down:
-            _player->SetVelocity(0, 1.5f);
-            break;
-        case sf::Keyboard::Key::Left:
-            _player->SetVelocity(-1.5f, 0);
-            break;
-        case sf::Keyboard::Key::Right:
-            _player->SetVelocity(1.5f, 0);
-            break;
-        
-        default:
-            break;
+        switch (event.key.code)
+        {
+            case sf::Keyboard::Key::Up:
+                _player->SetVelocity(0, -1.5f);
+                break;
+            case sf::Keyboard::Key::Down:
+                _player->SetVelocity(0, 1.5f);
+                break;
+            case sf::Keyboard::Key::Left:
+                _player->SetVelocity(-1.5f, 0);
+                break;
+            case sf::Keyboard::Key::Right:
+                _player->SetVelocity(1.5f, 0);
+                break;
+            
+            default:
+                break;
+        }
     }
 }
 
@@ -265,13 +270,15 @@ bool GameManager::InitPlayer()
     std::cout << "Player Initialized" << std::endl;
 
     // update position and velocity
-    _player->SetPosition(static_cast<float>(_graphics->GetWidth()) / 2.0f, static_cast<float>(_graphics->GetHeight()) / 2.0f);
+    // _player->SetPosition(static_cast<float>(_graphics->GetWidth()) / 2.0f, static_cast<float>(_graphics->GetHeight()) / 2.0f);
+    sf::Vector2f pos = _intersections[0].GetPosition();
+    _player->SetPosition(pos.x, pos.y);
     _player->SetVelocity( 1.5f, 0.0f );
 
     // creating new thread for Player
-    std::thread t(&Entity::Init, std::ref(*_player));
+    _player->Init();
     // thread moved to game manager threads vector
-    _threads.emplace_back(std::move(t));
+    // _threads.emplace_back(std::move(t));
 
     return true;
 }
@@ -279,8 +286,11 @@ bool GameManager::InitPlayer()
 bool GameManager::InitEnemies()
 {   
     auto enemy1 = std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::MAGENTA);
-    enemy1->SetPosition(50.0f, 50.0f);
+    sf::Vector2f pos = _intersections[1].GetPosition();
+    enemy1->SetPosition(pos.x, pos.y);
     enemy1->SetVelocity( 0.0f, 0.0f );
+
+    enemy1->Init();
 
     _enemies.emplace_back(std::move(enemy1));
     // _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::BLUE));
@@ -294,6 +304,15 @@ bool GameManager::InitEnemies()
 
 bool GameManager::InitMaze()
 {
+    _intersections.emplace_back(Intersection(100.0f, 100.0f));
+    _intersections.emplace_back(Intersection(400.0f, 400));
+    _intersections.emplace_back(Intersection(100.0f, 400));
+    _intersections.emplace_back(Intersection(400.0f, 100));
+
+    std::for_each(_intersections.begin(), _intersections.end(), [this](Intersection& inter_){
+        inter_.FindNeighbors();
+    });
+
     std::cout << "Maze Initialized" << std::endl;
     return true;
 }

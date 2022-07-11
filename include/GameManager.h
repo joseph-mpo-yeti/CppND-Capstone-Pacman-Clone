@@ -9,6 +9,7 @@
 #include "Entity.h"
 #include "Assets.h"
 #include "Collision.h"
+#include "Intersection.h"
 
 // forward declaration
 class GameManager;
@@ -71,6 +72,8 @@ class GameManager
         std::unique_ptr<Entity> _player;
         std::vector<std::unique_ptr<Entity>> _enemies; 
         std::vector<std::thread> _threads;
+        std::vector<Intersection> _intersections;
+
 };
 
 #endif // GAME_MANAGER_H

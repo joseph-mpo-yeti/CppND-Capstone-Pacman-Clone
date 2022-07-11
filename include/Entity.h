@@ -6,6 +6,7 @@
 
 #include "Tag.h"
 #include "Transform.h"
+#include "Intersection.h"
 
 enum class EntityState
 {
@@ -24,6 +25,7 @@ class Entity
         EntityType GetType() const { return _entityType; }
         EnemyTag GetTag() const { return _tag; }
         Transform& GetTransform() { return _transform; }
+        Direction GetDirection(){ return _direction; }
         EntityState GetState() { return _state; }
         sf::Texture& GetTexture(){ return *_texture.get(); }
         sf::CircleShape& GetShape(){ return _shape; }
@@ -31,13 +33,13 @@ class Entity
 
         void SetVelocity(float x , float y){ _transform.velocity = {x ,y}; }
         void SetPosition(float x , float y){ _shape.setPosition({x ,y}); }
+        void SetDirection(Direction dir){ _direction = dir; }
         void SetType(EntityType type){ _entityType = type; }
         void SetTag(EnemyTag tag){ _tag = tag; }
+        void LoadTexture(std::unique_ptr<sf::Texture> texture);
 
         // behavior
         void Init();
-        void LoadTexture(std::unique_ptr<sf::Texture> texture);
-        
     
     private:
         // data members
@@ -45,6 +47,7 @@ class Entity
         EnemyTag _tag;
         EntityState _state;
         Transform _transform;
+        Direction _direction;
         float _radius;
         sf::CircleShape _shape;
         std::unique_ptr<sf::Texture> _texture { nullptr };
