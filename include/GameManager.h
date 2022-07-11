@@ -8,9 +8,18 @@
 #include "Graphics.h"
 #include "Entity.h"
 #include "Assets.h"
+#include "Collision.h"
 
 // forward declaration
 class GameManager;
+
+enum class GameState
+{
+    IDLE,
+    PAUSED,
+    RUNNING,
+    ENDED
+};
 
 class GameManager 
 {
@@ -44,7 +53,8 @@ class GameManager
         void EndGame();
         void ProcessInput(sf::Event& event);
         void OnKeyPressed(sf::Event& event);
-        
+        void UpdateEntityPosition(std::unique_ptr<Entity>& entity);
+
         // helpers
         void MoveHere(GameManager&& other);
         
@@ -55,8 +65,8 @@ class GameManager
     private:
         // private members
         int _score { 0 };
-        bool _isPaused = false;
-        bool _isRunning = false;
+        GameState _state;
+        CollisionDetector _collisionDetector;
         std::unique_ptr<Graphics> _graphics;
         std::unique_ptr<Entity> _player;
         std::vector<std::unique_ptr<Entity>> _enemies; 

@@ -59,9 +59,7 @@ std::ostream& operator<<(std::ostream& out, const EnemyTag& tag)
 
 void Graphics::Render(std::unique_ptr<Entity>& entity){
     std::cout << "Rendering entity with tag: " << entity->GetTag() << std::endl; 
-    
-    if(entity->GetTag() == EnemyTag::PLAYER)
-        _window->draw(entity->GetShape());
+    _window->draw(entity->GetShape());
     
 }
 

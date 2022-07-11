@@ -13,10 +13,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 file(GLOB project_SRCS src/*.cpp)
 
-find_package(SFML 2.5 COMPONENTS system graphics audio REQUIRED)
+find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
+
+find_package(wxWidgets 3.0 REQUIRED COMPONENTS core base)
+include(${wxWidgets_USE_FILE})
 
 include_directories(include)
 
 add_executable(pacman ${project_SRCS})
 
-target_link_libraries(pacman pthread sfml-system sfml-graphics sfml-audio)
+target_link_libraries(pacman pthread sfml-graphics sfml-audio ${wxWidgets_LIBRARIES})

@@ -46,8 +46,7 @@ GameManager& GameManager::operator=(GameManager&& other)
 void GameManager::MoveHere(GameManager&& other)
 {
     _score = other._score;
-    _isPaused = other._isPaused;
-    _isRunning = other._isRunning;
+    _state = other._state;
     _graphics = std::move(other._graphics);
     other._graphics = nullptr;
     _player = std::move(other._player);
@@ -95,7 +94,7 @@ void GameManager::Run()
     auto lastUpdate = std::chrono::system_clock::now();
     int timeSinceLastUpdate = 0;
 
-    _isRunning = true;
+    _state = GameState::RUNNING;
 
     while(_graphics->GetWindow().isOpen()){
 
@@ -116,44 +115,49 @@ void GameManager::Run()
 
 void GameManager::OnKeyPressed(sf::Event& event)
 {
-    switch (event.key.code)
-    {
-    case sf::Keyboard::Key::Space:
-        if(_isPaused){
+    if(event.key.code == sf::Keyboard::Key::Space){
+        if(_state == GameState::PAUSED){
             Resume();
         } else {
             Pause();
         }
-        break;
-    case sf::Keyboard::Key::Up:
-        if(!_isPaused) _player->SetVelocity(0, -1.5f);
-        break;
-    case sf::Keyboard::Key::Down:
-        if(!_isPaused) _player->SetVelocity(0, 1.5f);
-        break;
-    case sf::Keyboard::Key::Left:
-        if(!_isPaused) _player->SetVelocity(-1.5f, 0);
-        break;
-    case sf::Keyboard::Key::Right:
-        if(!_isPaused) _player->SetVelocity(1.5f, 0);
-        break;
-    
-    default:
-        break;
+
+        return;
+    }
+
+    switch (event.key.code)
+    {
+        case sf::Keyboard::Key::Up:
+            _player->SetVelocity(0, -1.5f);
+            break;
+        case sf::Keyboard::Key::Down:
+            _player->SetVelocity(0, 1.5f);
+            break;
+        case sf::Keyboard::Key::Left:
+            _player->SetVelocity(-1.5f, 0);
+            break;
+        case sf::Keyboard::Key::Right:
+            _player->SetVelocity(1.5f, 0);
+            break;
+        
+        default:
+            break;
     }
 }
 
 void GameManager::ProcessInput(sf::Event& event)
 {
-    std::cout << "Polling events..." << std::endl;
+    if(_state != GameState::PAUSED)
+        std::cout << "Polling events..." << std::endl;
     // polling events
     _graphics->GetWindow().pollEvent(event);
+    int res;
 
     // handling input
     switch (event.type) {
         case sf::Event::Closed:
             EndGame();
-            return;
+            break;
         case sf::Event::KeyPressed:
             OnKeyPressed(event);
             break;
@@ -164,32 +168,51 @@ void GameManager::ProcessInput(sf::Event& event)
 
 void GameManager::Update()
 {
-    if(_isPaused || !_isRunning)
+    if(_state != GameState::RUNNING)
         return;
 
-    // Implement Collision detection
-    // Update lives and score
-    // Update transform
-    // Update food and powerups
-    // 
-    sf::Vector2f pos = _player->GetShape().getPosition();
-    sf::Vector2f vel = _player->GetTransform().velocity;
-    pos += vel;
+    // Update enemy positions
+    std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
+        UpdateEntityPosition(enemy);
+    });
 
-    // Wrap around window border
-    if(pos.x > _graphics->GetWidth()) pos.x = 0.0f;
-    if(pos.x < 0.0f) pos.x = _graphics->GetWidth();
-    if(pos.y > _graphics->GetHeight()) pos.y = 0.0f;
-    if(pos.y < 0.0f) pos.y = _graphics->GetHeight();
+    // Update player position
+    UpdateEntityPosition(_player);
 
-    _player->GetShape().setPosition(pos);
+    // detect collision
+    std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
+        if(CollisionDetector::AreColliding(_player->GetTransform().position, enemy->GetTransform().position, enemy->GetRadius())){
+            std::cout << "Player collided with an enemy" << std::endl;
+            Pause();
+        }
+    });
 
     std::cout << "Game updated" << std::endl;
 }
 
+void GameManager::UpdateEntityPosition(std::unique_ptr<Entity>& entity)
+{
+    sf::Vector2f pos = entity->GetShape().getPosition();
+    sf::Vector2f vel = entity->GetTransform().velocity;
+    pos += vel;
+
+
+    // Wrap player around window border
+    if(entity->GetType() == EntityType::PLAYER)
+    {
+        if(pos.x > _graphics->GetWidth()) pos.x = 0.0f;
+        if(pos.x < 0.0f) pos.x = _graphics->GetWidth();
+        if(pos.y > _graphics->GetHeight()) pos.y = 0.0f;
+        if(pos.y < 0.0f) pos.y = _graphics->GetHeight();
+    }
+
+    entity->GetTransform().position = pos;
+    entity->GetShape().setPosition(pos);
+}
+
 void GameManager::Render()
 {
-    if(_isPaused || !_isRunning)
+    if(_state != GameState::RUNNING)
         return;
     
     sf::RenderWindow& window = _graphics->GetWindow();
@@ -227,13 +250,13 @@ void GameManager::HideLoading()
 void GameManager::Pause()
 {
     std::cout << "Game Paused..." << std::endl;
-    _isPaused = true;
+    _state = GameState::PAUSED;
 }
 
 void GameManager::Resume()
 {
     std::cout << "Game Resumed..." << std::endl;
-    _isPaused = false;
+    _state = GameState::RUNNING;
 }
 
 bool GameManager::InitPlayer()
@@ -255,10 +278,14 @@ bool GameManager::InitPlayer()
 
 bool GameManager::InitEnemies()
 {   
-    _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::MAGENTA));
-    _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::BLUE));
-    _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::GREEN));
-    _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::RED));
+    auto enemy1 = std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::MAGENTA);
+    enemy1->SetPosition(50.0f, 50.0f);
+    enemy1->SetVelocity( 0.0f, 0.0f );
+
+    _enemies.emplace_back(std::move(enemy1));
+    // _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::BLUE));
+    // _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::GREEN));
+    // _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::RED));
 
     std::cout << "Enemies Initialized" << std::endl;
 
@@ -273,6 +300,6 @@ bool GameManager::InitMaze()
 
 void GameManager::EndGame()
 {
-    _isRunning = false;
+    _state = GameState::ENDED;
     _graphics->GetWindow().close();
 }

@@ -6,7 +6,13 @@
 
 #include "Tag.h"
 #include "Transform.h"
-#include "Collider.h"
+
+enum class EntityState
+{
+    IDLE,
+    ALIVE,
+    DEAD
+};
 
 class Entity
 {
@@ -15,17 +21,18 @@ class Entity
         Entity(EntityType entityType, EnemyTag tag);
         
         // getters / setters
-        EntityType GetType() const { return _entityType; };
-        EnemyTag GetTag() const { return _tag; };
-        Transform& GetTransform() { return _transform; };
-        Collider& GetCollider() { return _collider; };
-        sf::Texture& GetTexture(){ return *_texture.get(); };
+        EntityType GetType() const { return _entityType; }
+        EnemyTag GetTag() const { return _tag; }
+        Transform& GetTransform() { return _transform; }
+        EntityState GetState() { return _state; }
+        sf::Texture& GetTexture(){ return *_texture.get(); }
+        sf::CircleShape& GetShape(){ return _shape; }
+        float GetRadius() { return _radius; }
+
         void SetVelocity(float x , float y){ _transform.velocity = {x ,y}; }
         void SetPosition(float x , float y){ _shape.setPosition({x ,y}); }
-        sf::CircleShape& GetShape(){ return _shape; };
-        void SetType(EntityType type){ _entityType = type; };
-        void SetTag(EnemyTag tag){ _tag = tag; };
-        bool IsAlive() { return _isAlive; };
+        void SetType(EntityType type){ _entityType = type; }
+        void SetTag(EnemyTag tag){ _tag = tag; }
 
         // behavior
         void Init();
@@ -36,10 +43,9 @@ class Entity
         // data members
         EntityType _entityType;
         EnemyTag _tag;
-        bool _isAlive;
+        EntityState _state;
         Transform _transform;
-        Collider _collider;
-        // TODO: remove and leave texture
+        float _radius;
         sf::CircleShape _shape;
         std::unique_ptr<sf::Texture> _texture { nullptr };
 

@@ -2,10 +2,11 @@
 
 #include "Entity.h"
 
-Entity::Entity(EntityType entityType, EnemyTag tag) : _entityType(entityType), _tag(tag), _isAlive(true)
+Entity::Entity(EntityType entityType, EnemyTag tag) : _entityType(entityType), _tag(tag), _state(EntityState::IDLE)
 {
-    _shape = sf::CircleShape(15.0f, 60UL);
-    _shape.setOrigin(_shape.getRadius() / 2.0f, _shape.getRadius() / 2.0f);
+    _radius = 15.0f;
+    _shape = sf::CircleShape(_radius);
+    _shape.setOrigin(_radius / 2.0f, _radius / 2.0f);
 }
 
 void Entity::LoadTexture(std::unique_ptr<sf::Texture> texture)
