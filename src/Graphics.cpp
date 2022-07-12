@@ -30,35 +30,7 @@ bool Graphics::Init()
     return true;
 }
 
-// helper for printing tag
-std::ostream& operator<<(std::ostream& out, const EnemyTag& tag)
-{
-    switch (tag)
-    {
-    case EnemyTag::PLAYER:
-        out << "PLAYER";
-        break;
-    case EnemyTag::RED:
-        out << "ENEMY_RED";
-        break;
-    case EnemyTag::GREEN:
-        out << "ENEMY_GREEN";
-        break;
-    case EnemyTag::MAGENTA:
-        out << "ENEMY_MAGENTA";
-        break;
-    case EnemyTag::BLUE:
-        out << "ENEMY_BLUE";
-        break;
-    default:
-        break;
-    }
-
-    return out;
-}
-
 void Graphics::Render(std::unique_ptr<Entity>& entity){
-    std::cout << "Rendering entity with tag: " << entity->GetTag() << std::endl; 
+    std::cout << "Rendering entity with tag: " << entity->GetTagName() << std::endl;
     _window->draw(entity->GetShape());
-    
 }

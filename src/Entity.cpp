@@ -92,3 +92,27 @@ void Entity::AddEnemyTexCoordinates(sf::Vector2u* coordinates)
         {coordinates[0], coordinates[1]}
     );
 }
+
+std::string Entity::GetTagName()
+{
+    switch (_tag)
+    {
+    case EnemyTag::PLAYER:
+        return "PLAYER";
+        break;
+    case EnemyTag::RED:
+        return "ENEMY_RED";
+        break;
+    case EnemyTag::GREEN:
+        return "ENEMY_GREEN";
+        break;
+    case EnemyTag::MAGENTA:
+        return "ENEMY_MAGENTA";
+        break;
+    case EnemyTag::BLUE:
+        return "ENEMY_BLUE";
+        break;
+    default:
+        break;
+    }
+}

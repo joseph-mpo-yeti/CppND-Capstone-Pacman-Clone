@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <algorithm>
 #include <chrono>
+#include <exception>
 
 #include <SFML/Graphics.hpp>
 
@@ -73,15 +74,9 @@ bool GameManager::Init()
 
     LoadTexture();
 
-    // loading assets in separate threads
-    auto mazeInitFuture = std::async(std::launch::async, &GameManager::InitMaze, this);
-    auto enemiesInitFuture = std::async(std::launch::async, &GameManager::InitEnemies, this);
-    auto playerInitFuture = std::async(std::launch::async, &GameManager::InitPlayer, this);
-
-    if(!playerInitFuture.get() || !enemiesInitFuture.get() || !mazeInitFuture.get()){
-        std::cout << "Failed to initialize game objects. " << std::endl;
-        return false;
-    }
+    InitMaze();
+    InitPlayer();
+    InitEnemies();
 
     HideLoading();
 
@@ -102,9 +97,9 @@ void GameManager::Run()
     sf::Event event;
 
     auto lastUpdate = std::chrono::system_clock::now();
+    auto lastPlayerAnimationUpdate = lastUpdate;
+    auto lastEnemiesAnimationUpdate = lastUpdate;
     int timeSinceLastUpdate = 0;
-    auto lastPlayerAnimationUpdate = std::chrono::system_clock::now();
-    auto lastEnemiesAnimationUpdate = std::chrono::system_clock::now();
 
     _state = GameState::RUNNING;
 
@@ -326,11 +321,12 @@ bool GameManager::InitEntity(std::unique_ptr<Entity>& entity, sf::Vector2f pos)
     entity->SetState(EntityState::IDLE);
     entity->LoadTexCoordinates();
     entity->LoadShapes(entity->GetSize(), &_spriteSheetTexture);
+    
+    std::cout << entity->GetTagName() << " Initialized." << std::endl;
 
     if(entity->GetType() == EntityType::ENEMY){
         _enemies.emplace_back(std::move(entity));
     }
-    std::cout << entity << " Initialized." << std::endl;
 
     return true;
 }
@@ -347,7 +343,7 @@ bool GameManager::InitMaze()
         inter_.FindNeighbors();
     });
 
-    std::cout << "Maze Initialized" << std::endl;
+    std::cout << "MAZE Initialized" << std::endl;
     return true;
 }
 

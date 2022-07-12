@@ -32,6 +32,7 @@ class Entity
         std::vector<sf::RectangleShape>& GetShapes(Direction direction){ return _shapes.at(direction); }
         sf::Vector2u ComputeTopLeftPoint(sf::Vector2u coordinates, sf::Vector2f clipSize);
         sf::Vector2f GetSize() { return _size; }
+        std::string GetTagName();
 
         void SetVelocity(float x , float y){ _transform.velocity = {x ,y}; }
         void SetPosition(float x , float y){ _shape.setPosition({x ,y}); }
