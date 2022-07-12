@@ -22,4 +22,13 @@ enum class EnemyTag
     MAGENTA
 };
 
+enum class EntityState
+{
+    IDLE,
+    WAITING,
+    ALIVE,
+    VULNERABLE,
+    DEAD
+};
+
 #endif // TAG_H

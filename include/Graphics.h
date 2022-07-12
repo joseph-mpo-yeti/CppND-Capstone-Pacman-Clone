@@ -25,7 +25,6 @@ class Graphics
         // behavior
         bool Init();
         void Render(std::unique_ptr<Entity>& entity);
-        std::unique_ptr<sf::Texture> LoadTexture(std::string filename);
 
         // setters / getters
         int GetHeight() { return _height; };

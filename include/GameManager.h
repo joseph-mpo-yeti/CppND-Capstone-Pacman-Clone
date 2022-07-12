@@ -52,9 +52,11 @@ class GameManager
         void ShowGame();
         void HideGame();
         void EndGame();
+        void LoadTexture();
         void ProcessInput(sf::Event& event);
         void OnKeyPressed(sf::Event& event);
         void UpdateEntityPosition(std::unique_ptr<Entity>& entity);
+        void UpdateEntityTexture(std::unique_ptr<Entity>& entity);
 
         // helpers
         void MoveHere(GameManager&& other);
@@ -62,6 +64,7 @@ class GameManager
         bool InitPlayer();
         bool InitEnemies();
         bool InitMaze();
+        bool InitEntity(std::unique_ptr<Entity>& entity, sf::Vector2f pos);
 
     private:
         // private members
@@ -71,6 +74,7 @@ class GameManager
         std::unique_ptr<Graphics> _graphics;
         std::unique_ptr<Entity> _player;
         std::vector<std::unique_ptr<Entity>> _enemies; 
+        sf::Texture _spriteSheetTexture;
         std::vector<std::thread> _threads;
         std::vector<Intersection> _intersections;
 

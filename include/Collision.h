@@ -7,7 +7,7 @@ class CollisionDetector
 {
     public:
         CollisionDetector(){};
-        static bool AreColliding(sf::Vector2f positionPlayer, sf::Vector2f positionEnemy, float radius);
+        static bool AreColliding(sf::Vector2f positionPlayer, sf::Vector2f positionEnemy, sf::Vector2f size);
 
 };
 

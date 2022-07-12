@@ -62,10 +62,3 @@ void Graphics::Render(std::unique_ptr<Entity>& entity){
     _window->draw(entity->GetShape());
     
 }
-
-std::unique_ptr<sf::Texture> Graphics::LoadTexture(std::string filename)
-{
-    std::unique_ptr<sf::Texture> tex = std::make_unique<sf::Texture>();
-
-    return std::move(tex);
-}

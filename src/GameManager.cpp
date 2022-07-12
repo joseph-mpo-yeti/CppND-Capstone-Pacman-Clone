@@ -70,7 +70,9 @@ bool GameManager::Init()
         return false;
 
     ShowLoading();
-               
+
+    LoadTexture();
+
     // loading assets in separate threads
     auto mazeInitFuture = std::async(std::launch::async, &GameManager::InitMaze, this);
     auto enemiesInitFuture = std::async(std::launch::async, &GameManager::InitEnemies, this);
@@ -81,7 +83,14 @@ bool GameManager::Init()
         return false;
     }
 
+    HideLoading();
+
     return true;
+}
+
+void GameManager::LoadTexture()
+{
+    _spriteSheetTexture.loadFromFile("../assets/images/sprite_sheet.png");
 }
 
 void GameManager::Run()
@@ -132,15 +141,19 @@ void GameManager::OnKeyPressed(sf::Event& event)
         switch (event.key.code)
         {
             case sf::Keyboard::Key::Up:
+                _player->SetDirection(Direction::UP);
                 _player->SetVelocity(0, -1.5f);
                 break;
             case sf::Keyboard::Key::Down:
+                _player->SetDirection(Direction::DOWN);
                 _player->SetVelocity(0, 1.5f);
                 break;
             case sf::Keyboard::Key::Left:
+                _player->SetDirection(Direction::LEFT);
                 _player->SetVelocity(-1.5f, 0);
                 break;
             case sf::Keyboard::Key::Right:
+                _player->SetDirection(Direction::RIGHT);
                 _player->SetVelocity(1.5f, 0);
                 break;
             
@@ -179,14 +192,16 @@ void GameManager::Update()
     // Update enemy positions
     std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
         UpdateEntityPosition(enemy);
+        UpdateEntityTexture(enemy);
     });
 
     // Update player position
     UpdateEntityPosition(_player);
+    UpdateEntityTexture(_player);
 
     // detect collision
     std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
-        if(CollisionDetector::AreColliding(_player->GetTransform().position, enemy->GetTransform().position, enemy->GetRadius())){
+        if(CollisionDetector::AreColliding(_player->GetTransform().position, enemy->GetTransform().position, enemy->GetSize())){
             std::cout << "Player collided with an enemy" << std::endl;
             Pause();
         }
@@ -213,6 +228,15 @@ void GameManager::UpdateEntityPosition(std::unique_ptr<Entity>& entity)
 
     entity->GetTransform().position = pos;
     entity->GetShape().setPosition(pos);
+}
+
+void GameManager::UpdateEntityTexture(std::unique_ptr<Entity>& entity)
+{
+    auto shapes = entity->GetShapes(entity->GetDirection());
+    if(!shapes.empty() && shapes.size() >= 2){
+        entity->SetShape(shapes[1]);
+        entity->SetPosition(entity->GetTransform().position);
+    }
 }
 
 void GameManager::Render()
@@ -266,38 +290,36 @@ void GameManager::Resume()
 
 bool GameManager::InitPlayer()
 {
-    // create texture and set player transform in maze
-    std::cout << "Player Initialized" << std::endl;
-
-    // update position and velocity
-    // _player->SetPosition(static_cast<float>(_graphics->GetWidth()) / 2.0f, static_cast<float>(_graphics->GetHeight()) / 2.0f);
-    sf::Vector2f pos = _intersections[0].GetPosition();
-    _player->SetPosition(pos.x, pos.y);
-    _player->SetVelocity( 1.5f, 0.0f );
-
-    // creating new thread for Player
-    _player->Init();
-    // thread moved to game manager threads vector
-    // _threads.emplace_back(std::move(t));
-
-    return true;
+    return InitEntity(_player, _intersections[0].GetPosition());
 }
 
 bool GameManager::InitEnemies()
 {   
-    auto enemy1 = std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::MAGENTA);
-    sf::Vector2f pos = _intersections[1].GetPosition();
-    enemy1->SetPosition(pos.x, pos.y);
-    enemy1->SetVelocity( 0.0f, 0.0f );
+    auto enemy_magenta = std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::MAGENTA);
+    auto enemy_red = std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::RED);
+    auto enemy_blue = std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::BLUE);
+    auto enemy_green = std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::GREEN);
 
-    enemy1->Init();
+    InitEntity(enemy_magenta, _intersections[1].GetPosition());
+    InitEntity(enemy_red, _intersections[2].GetPosition());
+    InitEntity(enemy_blue, _intersections[3].GetPosition());
+    InitEntity(enemy_green, _intersections[4].GetPosition());
 
-    _enemies.emplace_back(std::move(enemy1));
-    // _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::BLUE));
-    // _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::GREEN));
-    // _enemies.emplace_back(std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::RED));
+    return true;
+}
 
-    std::cout << "Enemies Initialized" << std::endl;
+bool GameManager::InitEntity(std::unique_ptr<Entity>& entity, sf::Vector2f pos)
+{
+    entity->SetPosition(pos.x, pos.y);
+    entity->SetVelocity( 0.0f, 0.0f );
+    entity->SetDirection(Direction::LEFT);
+    entity->LoadTexCoordinates();
+    entity->LoadShapes(entity->GetSize(), &_spriteSheetTexture);
+
+    if(entity->GetType() == EntityType::ENEMY){
+        _enemies.emplace_back(std::move(entity));
+    }
+    std::cout << entity << " Initialized." << std::endl;
 
     return true;
 }
@@ -306,6 +328,7 @@ bool GameManager::InitMaze()
 {
     _intersections.emplace_back(Intersection(100.0f, 100.0f));
     _intersections.emplace_back(Intersection(400.0f, 400));
+    _intersections.emplace_back(Intersection(200.0f, 200));
     _intersections.emplace_back(Intersection(100.0f, 400));
     _intersections.emplace_back(Intersection(400.0f, 100));
 
