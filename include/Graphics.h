@@ -38,6 +38,7 @@ class Graphics
         int _frameRate, _frameDuration;
         bool _isPaused = false;
         std::string _title;
+        sf::View _view;
         std::unique_ptr<sf::RenderWindow> _window { nullptr };
 
 };

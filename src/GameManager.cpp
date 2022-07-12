@@ -103,19 +103,20 @@ void GameManager::Run()
 
     auto lastUpdate = std::chrono::system_clock::now();
     int timeSinceLastUpdate = 0;
+    auto lastPlayerAnimationUpdate = std::chrono::system_clock::now();
+    auto lastEnemiesAnimationUpdate = std::chrono::system_clock::now();
 
     _state = GameState::RUNNING;
 
     while(_graphics->GetWindow().isOpen()){
-
-        
         timeSinceLastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastUpdate).count();
+        
         if(timeSinceLastUpdate < _graphics->GetFrameDuration()){
             sf::sleep(sf::milliseconds(_graphics->GetFrameDuration() - timeSinceLastUpdate));
         }
-        
+
         ProcessInput(event);
-        Update();
+        Update(lastPlayerAnimationUpdate, lastEnemiesAnimationUpdate);
         Render();
 
         lastUpdate = std::chrono::system_clock::now();
@@ -184,25 +185,37 @@ void GameManager::ProcessInput(sf::Event& event)
     }
 }
 
-void GameManager::Update()
+void GameManager::Update(std::chrono::system_clock::time_point& lastPlayerAnimationUpdate, std::chrono::system_clock::time_point& lastEnemiesAnimationUpdate)
 {
     if(_state != GameState::RUNNING)
         return;
 
+    int lastPlayerUpdateDuration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastPlayerAnimationUpdate).count();
+    int lastEnemiesUpdateDuration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastEnemiesAnimationUpdate).count();
+
     // Update enemy positions
-    std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
+    std::for_each(_enemies.begin(), _enemies.end(), [this, lastEnemiesUpdateDuration, &lastEnemiesAnimationUpdate](std::unique_ptr<Entity>& enemy){
         UpdateEntityPosition(enemy);
-        UpdateEntityTexture(enemy);
+        if( lastEnemiesUpdateDuration >= 250){
+            Animation::Update(enemy.get());
+            lastEnemiesAnimationUpdate = std::chrono::system_clock::now();
+        }
     });
 
     // Update player position
     UpdateEntityPosition(_player);
-    UpdateEntityTexture(_player);
+
+    if( lastPlayerUpdateDuration >= 100){
+        Animation::Update(_player.get());
+        lastPlayerAnimationUpdate = std::chrono::system_clock::now();
+        std::cout << "Updated Animation" << std::endl;
+    }
 
     // detect collision
     std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
         if(CollisionDetector::AreColliding(_player->GetTransform().position, enemy->GetTransform().position, enemy->GetSize())){
             std::cout << "Player collided with an enemy" << std::endl;
+            _player->SetState(EntityState::DEAD);
             Pause();
         }
     });
@@ -217,14 +230,11 @@ void GameManager::UpdateEntityPosition(std::unique_ptr<Entity>& entity)
     pos += vel;
 
 
-    // Wrap player around window border
-    if(entity->GetType() == EntityType::PLAYER)
-    {
-        if(pos.x > _graphics->GetWidth()) pos.x = 0.0f;
-        if(pos.x < 0.0f) pos.x = _graphics->GetWidth();
-        if(pos.y > _graphics->GetHeight()) pos.y = 0.0f;
-        if(pos.y < 0.0f) pos.y = _graphics->GetHeight();
-    }
+    // Wrap entity around window border
+    if(pos.x > _graphics->GetWidth()) pos.x = 0.0f;
+    if(pos.x < 0.0f) pos.x = _graphics->GetWidth();
+    if(pos.y > _graphics->GetHeight()) pos.y = 0.0f;
+    if(pos.y < 0.0f) pos.y = _graphics->GetHeight();
 
     entity->GetTransform().position = pos;
     entity->GetShape().setPosition(pos);
@@ -290,7 +300,7 @@ void GameManager::Resume()
 
 bool GameManager::InitPlayer()
 {
-    return InitEntity(_player, _intersections[0].GetPosition());
+    return InitEntity(_player, _intersections[2].GetPosition());
 }
 
 bool GameManager::InitEnemies()
@@ -301,7 +311,7 @@ bool GameManager::InitEnemies()
     auto enemy_green = std::make_unique<Entity>(EntityType::ENEMY, EnemyTag::GREEN);
 
     InitEntity(enemy_magenta, _intersections[1].GetPosition());
-    InitEntity(enemy_red, _intersections[2].GetPosition());
+    InitEntity(enemy_red, _intersections[0].GetPosition());
     InitEntity(enemy_blue, _intersections[3].GetPosition());
     InitEntity(enemy_green, _intersections[4].GetPosition());
 
@@ -311,8 +321,9 @@ bool GameManager::InitEnemies()
 bool GameManager::InitEntity(std::unique_ptr<Entity>& entity, sf::Vector2f pos)
 {
     entity->SetPosition(pos.x, pos.y);
-    entity->SetVelocity( 0.0f, 0.0f );
+    entity->SetVelocity( -1.0f, 0.0f );
     entity->SetDirection(Direction::LEFT);
+    entity->SetState(EntityState::IDLE);
     entity->LoadTexCoordinates();
     entity->LoadShapes(entity->GetSize(), &_spriteSheetTexture);
 

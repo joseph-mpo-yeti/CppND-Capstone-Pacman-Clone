@@ -4,12 +4,14 @@
 #include <memory>
 #include <vector>
 #include <thread>
+#include <chrono>
 
 #include "Graphics.h"
 #include "Entity.h"
 #include "Assets.h"
 #include "Collision.h"
 #include "Intersection.h"
+#include "Animation.h"
 
 // forward declaration
 class GameManager;
@@ -43,7 +45,6 @@ class GameManager
 
     private:
         // bahavior
-        void Update();
         void Render();
         void Pause();
         void Resume();
@@ -57,6 +58,7 @@ class GameManager
         void OnKeyPressed(sf::Event& event);
         void UpdateEntityPosition(std::unique_ptr<Entity>& entity);
         void UpdateEntityTexture(std::unique_ptr<Entity>& entity);
+        void Update(std::chrono::system_clock::time_point& lastPlayerAnimationUpdate, std::chrono::system_clock::time_point& lastEnemiesAnimationUpdate);
 
         // helpers
         void MoveHere(GameManager&& other);

@@ -11,11 +11,16 @@
 #include "Transform.h"
 #include "Intersection.h"
 
+
+// forward declaration
+class Animation;
+
 class Entity
 {
     public:
         // constructor
         Entity(EntityType entityType, EnemyTag tag);
+        friend class Animation;
         
         // getters / setters
         EntityType GetType() const { return _entityType; }
@@ -35,14 +40,16 @@ class Entity
         void SetType(EntityType type){ _entityType = type; }
         void SetTag(EnemyTag tag){ _tag = tag; }
         void SetShape(sf::RectangleShape shape){ _shape = shape; }
+        void SetState(EntityState state){ _state = state; }
         void LoadTexCoordinates();
         void AddPlayerTexCoordinates(sf::Vector2u coordinates[23]);
         void AddEnemyTexCoordinates(sf::Vector2u coordinates[8]);
         void AddCoordinates(std::vector<sf::Vector2u> vecUp, std::vector<sf::Vector2u> vecDown, std::vector<sf::Vector2u> vecLeft, std::vector<sf::Vector2u> vecRight);
         void LoadShapes(sf::Vector2f clipSize, sf::Texture* texture);
-        void Animate();
+
 
     private:
+        int _animationIndex { 0 };
         EntityType _entityType;
         EnemyTag _tag;
         EntityState _state;
