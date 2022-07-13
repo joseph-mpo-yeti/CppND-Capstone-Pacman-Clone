@@ -5,7 +5,7 @@
 #include "Graphics.h"
 
 /* Graphics class implementation */
-Graphics::Graphics(): _title("Pacman"), _width(700.0f), _aspectRatio(4 / 3),  _frameRate(60)
+Graphics::Graphics(): _title("Pacman"), _width(700.0f), _aspectRatio(4 / 3),  _frameRate(120)
 {
     _height = _width * _aspectRatio;
     _frameDuration = 1000 / _frameRate;
@@ -25,7 +25,7 @@ Graphics::~Graphics()
 bool Graphics::Init()
 {
     _window = std::make_unique<sf::RenderWindow>(sf::VideoMode(_width, _height), _title, sf::Style::Close);
-    _window->setFramerateLimit(60);
+    _window->setFramerateLimit(120);
 
     return true;
 }

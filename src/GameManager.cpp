@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <cmath>
 
 #include <SFML/Graphics.hpp>
 
@@ -75,8 +76,13 @@ bool GameManager::Init()
     LoadTexture();
 
     InitMaze();
-    InitPlayer();
-    InitEnemies();
+    
+    // loading assets in separate threads
+    auto enemiesInitFuture = std::async(std::launch::async, &GameManager::InitEnemies, this);
+    auto playerInitFuture = std::async(std::launch::async, &GameManager::InitPlayer, this);
+
+    enemiesInitFuture.wait();
+    playerInitFuture.wait();
 
     HideLoading();
 
@@ -190,10 +196,12 @@ void GameManager::Update(std::chrono::system_clock::time_point& lastPlayerAnimat
 
     // Update enemy positions
     std::for_each(_enemies.begin(), _enemies.end(), [this, lastEnemiesUpdateDuration, &lastEnemiesAnimationUpdate](std::unique_ptr<Entity>& enemy){
-        UpdateEntityPosition(enemy);
-        if( lastEnemiesUpdateDuration >= 250){
-            Animation::Update(enemy.get());
-            lastEnemiesAnimationUpdate = std::chrono::system_clock::now();
+        if(_player->GetState() != EntityState::DEAD) {
+            UpdateEntityPosition(enemy);
+            if( lastEnemiesUpdateDuration >= 300){
+                Animation::Update(enemy.get());
+                lastEnemiesAnimationUpdate = std::chrono::system_clock::now();
+            }
         }
     });
 
@@ -206,14 +214,22 @@ void GameManager::Update(std::chrono::system_clock::time_point& lastPlayerAnimat
         std::cout << "Updated Animation" << std::endl;
     }
 
-    // detect collision
-    std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
-        if(CollisionDetector::AreColliding(_player->GetTransform().position, enemy->GetTransform().position, enemy->GetSize())){
-            std::cout << "Player collided with an enemy" << std::endl;
-            _player->SetState(EntityState::DEAD);
-            Pause();
-        }
-    });
+    if(_player->GetState() != EntityState::DEAD) {
+        // detect collision if player is alive
+        std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
+            if(CollisionDetector::AreColliding(_player->GetTransform().position, enemy->GetTransform().position, enemy->GetSize())){
+                std::cout << "Player collided with an enemy" << std::endl;
+                if(enemy->GetState() == EntityState::VULNERABLE){
+                    enemy->SetState(EntityState::DEAD);
+                    enemy->SetStateChanged(true);
+                } else {
+                    _player->SetState(EntityState::DEAD);
+                    _player->SetStateChanged(true);
+                }
+                //Pause();
+            }
+        });
+    }
 
     std::cout << "Game updated" << std::endl;
 }
@@ -222,17 +238,51 @@ void GameManager::UpdateEntityPosition(std::unique_ptr<Entity>& entity)
 {
     sf::Vector2f pos = entity->GetShape().getPosition();
     sf::Vector2f vel = entity->GetTransform().velocity;
+    
+    switch (entity->GetDirection())
+    {
+    case Direction::UP:
+        vel = { 0, -abs(vel.y) };
+        break;
+    case Direction::LEFT:
+        vel = { -abs(vel.x), 0 };
+        break;
+    case Direction::RIGHT:
+        vel = { abs(vel.x), 0 };
+        break;
+    case Direction::DOWN:
+        vel = { 0, abs(vel.y) };
+        break;
+    
+    default:
+        break;
+    }
+
     pos += vel;
 
 
-    // Wrap entity around window border
-    if(pos.x > _graphics->GetWidth()) pos.x = 0.0f;
-    if(pos.x < 0.0f) pos.x = _graphics->GetWidth();
-    if(pos.y > _graphics->GetHeight()) pos.y = 0.0f;
-    if(pos.y < 0.0f) pos.y = _graphics->GetHeight();
-
-    entity->GetTransform().position = pos;
-    entity->GetShape().setPosition(pos);
+    // Wrap entity around window border if player and turn back if enemy
+    if(entity->GetType() == EntityType::PLAYER){
+        if(pos.x > _graphics->GetWidth()) pos.x = 0.0f;
+        if(pos.x < 0.0f) pos.x = _graphics->GetWidth();
+        if(pos.y > _graphics->GetHeight()) pos.y = 0.0f;
+        if(pos.y < 0.0f) pos.y = _graphics->GetHeight();
+    } else {
+        auto half_side = entity->GetSize().x/2;
+        if(pos.x + half_side > _graphics->GetWidth()) entity->SetDirection(Direction::LEFT);
+        if(pos.x - half_side < 0.0f) entity->SetDirection(Direction::RIGHT);
+        if(pos.y + half_side > _graphics->GetHeight()) entity->SetDirection(Direction::UP);
+        if(pos.y - half_side < 0.0f) entity->SetDirection(Direction::DOWN);
+    }
+    if( entity->GetType() == EntityType::PLAYER && entity->GetState() == EntityState::DEAD){
+        if(entity->DeadAnimationIsOver()) {
+            // entity->();
+            Pause();
+        }
+    } else {
+        entity->GetTransform().position = pos;
+        entity->GetShape().setPosition(pos);
+    }
 }
 
 void GameManager::UpdateEntityTexture(std::unique_ptr<Entity>& entity)
@@ -316,8 +366,8 @@ bool GameManager::InitEnemies()
 bool GameManager::InitEntity(std::unique_ptr<Entity>& entity, sf::Vector2f pos)
 {
     entity->SetPosition(pos.x, pos.y);
-    entity->SetVelocity( -1.0f, 0.0f );
-    entity->SetDirection(Direction::LEFT);
+    entity->SetVelocity( 1.0f, 0.0f );
+    entity->SetDirection(Direction::RIGHT);
     entity->SetState(EntityState::IDLE);
     entity->LoadTexCoordinates();
     entity->LoadShapes(entity->GetSize(), &_spriteSheetTexture);
@@ -325,7 +375,14 @@ bool GameManager::InitEntity(std::unique_ptr<Entity>& entity, sf::Vector2f pos)
     std::cout << entity->GetTagName() << " Initialized." << std::endl;
 
     if(entity->GetType() == EntityType::ENEMY){
+        entity->SetMinAnimationIndex(0);
+        entity->SetAnimationIndex(0);
+        entity->SetMaxAnimationIndex(1);
         _enemies.emplace_back(std::move(entity));
+    } else {
+        entity->SetMinAnimationIndex(1);
+        entity->SetAnimationIndex(1);
+        entity->SetMaxAnimationIndex(2);
     }
 
     return true;

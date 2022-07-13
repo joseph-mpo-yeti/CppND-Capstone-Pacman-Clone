@@ -13,6 +13,7 @@ class Animation
     public:
         static void Update(Entity* entity);
         static void UpdateIndex(Entity* entity);
+        static void UpdateShapes(Entity* entity);
 
 };
 
