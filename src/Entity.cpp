@@ -49,6 +49,8 @@ void Entity::LoadTexCoordinates()
         default:
             break;
     }
+
+    
 }
 
 void Entity::LoadShapes(sf::Vector2f clipSize, sf::Texture* texture)

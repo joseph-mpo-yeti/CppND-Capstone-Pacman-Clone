@@ -302,6 +302,15 @@ void GameManager::Render()
     sf::RenderWindow& window = _graphics->GetWindow();
     window.clear();
 
+    sf::Texture texture;
+    texture.loadFromFile("../assets/images/maze_sprite_sheet.png");
+    sf::Sprite sprite;
+    sprite.setTexture(texture);
+    sprite.setPosition(0, 0);
+    _graphics->GetWindow().draw(sprite);
+
+    _graphics->Render(_player);
+
     _graphics->Render(_player);
 
     std::for_each(_enemies.begin(), _enemies.end(), [this](std::unique_ptr<Entity>& enemy){
@@ -313,7 +322,7 @@ void GameManager::Render()
 
 void GameManager::ShowGame()
 {
-
+    _graphics->Init();
 }
 
 void GameManager::ShowLoading()
