@@ -10,15 +10,11 @@ Pacman clone for Udacity's C++ Nanodegree Capstone Project
   * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
 * SFML >= 2.5
   * All installation instructions can be found [here](https://www.sfml-dev.org/tutorials/2.5/#getting-started)
-  >Note that for Linux, an `apt` or `apt-get` installation is preferred to building from source. 
+  >Run `sudo apt install libsfml-dev` to install on Ubuntu
 * gcc/g++ >= 5.4
   * Linux: gcc / g++ is installed by default on most Linux distros
   * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
   * Windows: recommend using [MinGW](http://www.mingw.org/)
-* wxWidgets >= 3.0
-  * Linux: `sudo apt-get install libwxgtk3.0-gtk3-dev libwxgtk3.0-gtk3-0v5`. If you are facing unmet dependency issues, refer to the [official page](https://wiki.codelite.org/pmwiki.php/Main/WxWidgets30Binaries#toc2) for installing the unmet dependencies.
-  * Mac: There is a [homebrew installation available](https://formulae.brew.sh/formula/wxmac).
-  * Installation instructions can be found [here](https://wiki.wxwidgets.org/Install). Some version numbers may need to be changed in instructions to install v3.0 or greater.
 
 ## Basic Build Instructions
 
