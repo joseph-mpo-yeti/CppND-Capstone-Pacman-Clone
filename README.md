@@ -10,7 +10,7 @@ Pacman clone for Udacity's C++ Nanodegree Capstone Project
   * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
 * SFML >= 2.5
   * All installation instructions can be found [here](https://www.sfml-dev.org/tutorials/2.5/#getting-started)
-  >Run `sudo apt install libsfml-dev` to install on Ubuntu
+  * Run `sudo apt install libsfml-dev` to install on Ubuntu
 * gcc/g++ >= 5.4
   * Linux: gcc / g++ is installed by default on most Linux distros
   * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
