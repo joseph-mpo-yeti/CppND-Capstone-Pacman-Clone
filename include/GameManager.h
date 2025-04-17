@@ -5,12 +5,12 @@
 #include <vector>
 #include <thread>
 #include <chrono>
+#include <box2d/box2d.h>
 
 #include "Graphics.h"
 #include "Entity.h"
 #include "Assets.h"
 #include "Collision.h"
-#include "Intersection.h"
 #include "Animation.h"
 
 // forward declaration

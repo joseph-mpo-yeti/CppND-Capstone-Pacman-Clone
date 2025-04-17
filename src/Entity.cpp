@@ -1,6 +1,7 @@
 #include <iostream>
 #include <utility>
 #include <algorithm>
+#include <box2d/box2d.h>
 
 #include "Entity.h"
 #include "Assets.h"

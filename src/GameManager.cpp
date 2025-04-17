@@ -8,6 +8,7 @@
 #include <exception>
 #include <cmath>
 
+#include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
 
 #include "GameManager.h"
@@ -51,8 +52,8 @@ void GameManager::MoveHere(GameManager&& other)
     _score = other._score;
     _state = other._state;
     _graphics = std::move(other._graphics);
-    other._graphics = nullptr;
     _player = std::move(other._player);
+    other._graphics = nullptr;
     other._player = nullptr;
     
     for(int i=0; i < other._enemies.size(); i++){
@@ -380,7 +381,14 @@ bool GameManager::InitEntity(std::unique_ptr<Entity>& entity, sf::Vector2f pos)
     entity->SetState(EntityState::IDLE);
     entity->LoadTexCoordinates();
     entity->LoadShapes(entity->GetSize(), &_spriteSheetTexture);
-    
+
+
+    /*
+    b2BodyDef bodyDef;
+    bodyDef.type = b2BodyType::b2_staticBody;
+    bodyDef.position.Set(_transform.position.x, _transform.position.y);
+    bodyDef.angle = _transform.rotation.y;
+    */
     std::cout << entity->GetTagName() << " Initialized." << std::endl;
 
     if(entity->GetType() == EntityType::ENEMY){
